@@ -4,8 +4,16 @@ import { saveExercises, getExercises, saveVideo, getVideo } from "../utils/db";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Define a TypeScript type for exercises
+export interface Exercise {
+  id: string;
+  name: string;
+  group: string; // Mapped from `muscle_group`
+  hasVideo: boolean;
+}
+
 export const useExercises = () => {
-  return useQuery({
+  return useQuery<Exercise[]>({
     queryKey: ["exercises"],
     queryFn: async () => {
       const cachedExercises = await getExercises();
@@ -14,11 +22,11 @@ export const useExercises = () => {
         return cachedExercises;
       }
 
-      console.log("🌍 Fetching exercises from API...");
-      const response = await axios.get(`${API_URL}/exercises`);
-      await saveExercises(response.data.exercises);
-      return response.data.exercises;
+      console.warn("⚠️ No exercises found locally. Please sync.");
+      return [];
     },
+    refetchOnMount: false, // Prevent unnecessary API calls on mount
+    refetchOnWindowFocus: false, // Don't refetch when switching tabs
   });
 };
 
@@ -28,15 +36,25 @@ export const useSyncExercises = () => {
   return useMutation({
     mutationFn: async () => {
       console.log("🔄 Syncing exercises with API...");
-      const response = await axios.post(`${API_URL}/sync`);
+      const response = await axios.post<{ exercises: Exercise[] }>(`${API_URL}/sync`);
       const exercises = response.data.exercises;
-      await saveExercises(exercises);
+
+      // Ensure exercises are correctly mapped and stored
+      const formattedExercises = exercises.map((exercise) => ({
+        id: exercise.id,
+        name: exercise.name,
+        group: exercise.group, // Ensure correct property mapping
+        hasVideo: Boolean(exercise.hasVideo),
+      }));
+
+      await saveExercises(formattedExercises);
 
       // Download and cache videos
-      for (const exercise of exercises) {
+      for (const exercise of formattedExercises) {
         if (exercise.hasVideo) {
           const existingVideo = await getVideo(exercise.id);
           if (!existingVideo) {
+            console.log(`📥 Downloading video for ${exercise.name}...`);
             const videoResponse = await axios.get(`${API_URL}/video/${exercise.id}`, {
               responseType: "blob",
             });
@@ -45,7 +63,7 @@ export const useSyncExercises = () => {
         }
       }
 
-      return exercises;
+      return formattedExercises;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
