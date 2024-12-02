@@ -5,9 +5,10 @@ function App() {
   return (
     <Router>
       <nav>
-        <Link to="/exercises">Exercises</Link>
+        <Link to="/">Home</Link> | <Link to="/exercises">Exercises</Link>
       </nav>
       <Routes>
+        <Route path="/" element={<h1>Welcome to Workout App</h1>} />
         <Route path="/exercises" element={<Exercises />} />
       </Routes>
     </Router>

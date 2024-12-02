@@ -1,7 +1,31 @@
-import { useExercises } from "../hooks/useExercises";
+import { useExercises, useSyncExercises } from "../hooks/useExercises";
+import { getVideo } from "../utils/db";
+import { useEffect, useState } from "react";
+
+interface Exercise {
+  id: string;
+  name: string;
+  group: string;
+}
 
 const Exercises = () => {
   const { data: exercises, isLoading, error } = useExercises();
+  const syncExercises = useSyncExercises();
+  const [videos, setVideos] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const loadVideos = async () => {
+      const videoMap: Record<string, string> = {};
+      for (const exercise of exercises || []) {
+        const videoBlob = await getVideo(exercise.id);
+        if (videoBlob) {
+          videoMap[exercise.id] = URL.createObjectURL(videoBlob);
+        }
+      }
+      setVideos(videoMap);
+    };
+    loadVideos();
+  }, [exercises]);
 
   if (isLoading) return <p>Loading exercises...</p>;
   if (error) return <p>Failed to load exercises.</p>;
@@ -9,10 +33,21 @@ const Exercises = () => {
   return (
     <div>
       <h1>Exercises</h1>
+      <button onClick={() => syncExercises.mutate()} disabled={syncExercises.isPending}>
+        {syncExercises.isPending ? "Syncing..." : "Sync Exercises"}
+      </button>
       <ul>
-        {exercises?.map((exercise: { id: string; name: string; group: string }) => (
+        {exercises?.map((exercise: Exercise) => (
           <li key={exercise.id}>
             <strong>{exercise.name}</strong> - {exercise.group}
+            {videos[exercise.id] ? (
+              <video controls width="250">
+                <source src={videos[exercise.id]} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <p>No video available</p>
+            )}
           </li>
         ))}
       </ul>
