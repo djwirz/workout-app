@@ -1,25 +1,37 @@
+.container {
+  text-align: center;
+  background-color: black;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .home {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
+  padding-top: 30vh; /* Moves 'Workouts' to about 1/3rd down the screen */
   text-align: center;
 }
 
-.home h1 {
+.home-title {
   font-size: 3rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
 .home-links {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.5rem; /* Increases spacing between links */
 }
 
 .home-links a {
   color: white;
   text-decoration: underline;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 }
