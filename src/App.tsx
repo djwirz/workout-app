@@ -1,21 +1,46 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Exercises from "./pages/Exercises";
-import Workouts from "./pages/Workouts";
-import WorkoutDetails from "./pages/WorkoutDetails";
+import Planned from "./pages/Planned";
+import Ongoing from "./pages/Ongoing";
+import Completed from "./pages/Completed";
+import Templates from "./pages/Templates";
 
 function App() {
   return (
     <Router>
-      <nav>
-        <Link to="/">Home</Link> | <Link to="/exercises">Exercises</Link> | <Link to="/workouts">Workouts</Link>
-      </nav>
-      <Routes>
-        <Route path="/" element={<h1>Welcome to Workout App</h1>} />
-        <Route path="/exercises" element={<Exercises />} />
-        <Route path="/workouts" element={<Workouts />} />
-        <Route path="/workouts/:id" element={<WorkoutDetails />} />
-      </Routes>
+      <div className="container">
+        <nav className="navbar">
+          <Link to="/planned">Planned</Link>
+          <Link to="/ongoing">Ongoing</Link>
+          <Link to="/completed">Completed</Link>
+          <Link to="/templates">Templates</Link>
+          <Link to="/exercises">Exercises</Link>
+        </nav>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/planned" element={<Planned />} />
+          <Route path="/ongoing" element={<Ongoing />} />
+          <Route path="/completed" element={<Completed />} />
+          <Route path="/templates" element={<Templates />} />
+          <Route path="/exercises" element={<Exercises />} />
+        </Routes>
+      </div>
     </Router>
+  );
+}
+
+function Home() {
+  return (
+    <div className="home">
+      <h1>Workouts</h1>
+      <div className="links">
+        <Link to="/planned">Planned</Link>
+        <Link to="/ongoing">Ongoing</Link>
+        <Link to="/completed">Completed</Link>
+        <Link to="/templates">Templates</Link>
+        <Link to="/exercises">Exercises</Link>
+      </div>
+    </div>
   );
 }
 
