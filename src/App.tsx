@@ -9,13 +9,6 @@ function App() {
   return (
     <Router>
       <div className="container">
-        <nav className="navbar">
-          <Link to="/planned">Planned</Link>
-          <Link to="/ongoing">Ongoing</Link>
-          <Link to="/completed">Completed</Link>
-          <Link to="/templates">Templates</Link>
-          <Link to="/exercises">Exercises</Link>
-        </nav>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/planned" element={<Planned />} />
@@ -33,15 +26,14 @@ function Home() {
   return (
     <div className="home">
       <h1>Workouts</h1>
-      <div className="links">
+      <nav className="home-links">
         <Link to="/planned">Planned</Link>
         <Link to="/ongoing">Ongoing</Link>
         <Link to="/completed">Completed</Link>
         <Link to="/templates">Templates</Link>
         <Link to="/exercises">Exercises</Link>
-      </div>
+      </nav>
     </div>
   );
 }
-
 export default App;
