@@ -35,9 +35,29 @@ export const getWorkouts = async () => {
 
 // ====== WORKOUT ENTRIES ======
 export const saveWorkoutEntries = async (workoutId: string, entries: unknown[]) => {
+  if (!workoutId) {
+    console.error("❌ Attempted to save workout entries with missing workoutId");
+    return;
+  }
+
+  console.log(`💾 Saving ${entries.length} workout entries for workout ${workoutId}`);
   await localforage.setItem(`workout-entries-${workoutId}`, entries);
 };
 
 export const getWorkoutEntries = async (workoutId: string) => {
-  return (await localforage.getItem(`workout-entries-${workoutId}`)) || [];
+  if (!workoutId) {
+    console.error("❌ getWorkoutEntries called with missing workoutId");
+    return [];
+  }
+
+  console.log(`📥 Retrieving workout entries for ${workoutId}`);
+  const entries = await localforage.getItem(`workout-entries-${workoutId}`);
+
+  if (!entries) {
+    console.warn(`⚠️ No workout entries found in IndexedDB for ${workoutId}`);
+    return [];
+  }
+
+  console.log(`✅ Loaded workout entries for ${workoutId}:`, entries);
+  return entries;
 };

@@ -4,7 +4,6 @@ import { saveWorkoutEntries, getWorkoutEntries } from "../utils/db";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Define a TypeScript type for workout entries
 export interface WorkoutEntry {
   id: string;
   workout_id: string;
@@ -20,13 +19,20 @@ export const useWorkoutEntries = (workoutId: string) => {
   return useQuery<WorkoutEntry[]>({
     queryKey: ["workout-entries", workoutId],
     queryFn: async () => {
+      if (!workoutId) {
+        console.error("❌ Invalid workout ID:", workoutId);
+        throw new Error("Workout ID is required.");
+      }
+
+      console.log(`🔎 Attempting to load workout entries for ${workoutId} from IndexedDB`);
       const cachedEntries = await getWorkoutEntries(workoutId);
+
       if (Array.isArray(cachedEntries) && cachedEntries.length > 0) {
-        console.log(`✅ Loaded entries for workout ${workoutId} from IndexedDB`);
+        console.log(`✅ Loaded ${cachedEntries.length} entries for workout ${workoutId}`);
         return cachedEntries;
       }
 
-      console.warn(`⚠️ No entries found locally for workout ${workoutId}. Please sync.`);
+      console.warn(`⚠️ No workout entries found locally for ${workoutId}.`);
       return [];
     },
     refetchOnMount: false,
@@ -41,8 +47,12 @@ export const useSyncWorkoutEntries = () => {
 
   return useMutation({
     mutationFn: async (workoutId: string) => {
+      if (!workoutId) {
+        throw new Error("Workout ID is required for syncing.");
+      }
+
       try {
-        console.log(`🔄 Syncing workout entries for workout ${workoutId}...`);
+        console.log(`🔄 Syncing workout entries for ${workoutId}...`);
         await axios.post(`${API_URL}/sync-workout-entries`);
 
         const response = await axios.get<{ entries: WorkoutEntry[] }>(`${API_URL}/workout/${workoutId}/entries`);
@@ -53,6 +63,7 @@ export const useSyncWorkoutEntries = () => {
           return [];
         }
 
+        console.log(`✅ Retrieved ${entries.length} entries from API. Saving to IndexedDB...`);
         await saveWorkoutEntries(workoutId, entries);
         return entries;
       } catch (error) {

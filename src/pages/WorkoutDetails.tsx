@@ -3,11 +3,27 @@ import { useWorkoutEntries } from "../hooks/useWorkoutEntries";
 
 const WorkoutDetails = () => {
   const { id: workoutId } = useParams();
+
+  console.log(`📌 WorkoutDetails.tsx: Rendering for workout ID ${workoutId}`);
+
   const { data: workoutEntries, isLoading, error } = useWorkoutEntries(workoutId || "");
 
-  if (isLoading) return <p>Loading workout entries...</p>;
-  if (error) return <p>Failed to load workout entries.</p>;
-  if (!workoutEntries || workoutEntries.length === 0) return <p>No entries found for this workout.</p>;
+  if (isLoading) {
+    console.log("⏳ Loading workout entries...");
+    return <p>Loading workout entries...</p>;
+  }
+
+  if (error) {
+    console.error("❌ Error loading workout entries:", error);
+    return <p>Failed to load workout entries.</p>;
+  }
+
+  if (!workoutEntries || workoutEntries.length === 0) {
+    console.warn(`⚠️ No entries found for workout ${workoutId}`);
+    return <p>No entries found. Try syncing while online.</p>;
+  }
+
+  console.log(`✅ Rendering ${workoutEntries.length} entries for workout ${workoutId}`);
 
   return (
     <div>
