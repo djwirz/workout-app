@@ -1,14 +1,3 @@
-.container {
-  text-align: center;
-  background-color: black;
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
 .home {
   display: flex;
   flex-direction: column;
@@ -21,12 +10,13 @@
 
 .home-title {
   font-size: 3rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2rem; /* Adds space between title and links */
 }
 
 .home-links {
   display: flex;
   flex-direction: column;
+  align-items: center; /* Ensures links are centered */
   gap: 1.5rem; /* Increases spacing between links */
 }
 
@@ -34,4 +24,5 @@
   color: white;
   text-decoration: underline;
   font-size: 1.5rem;
+  display: block; /* Forces each link to be on its own line */
 }
