@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { saveExercises, getExercises, saveVideo, getVideo } from "../utils/db";
+import { saveExercises, getExercises, saveVideo, getVideo, getLastSyncTime, setLastSyncTime } from "../utils/db";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export interface Exercise {
   id: string;
   name: string;
-  group: string; // Mapped from `muscle_group`
+  group: string;
   hasVideo: boolean;
 }
 
@@ -16,19 +16,18 @@ export const useExercises = () => {
   return useQuery<Exercise[]>({
     queryKey: ["exercises"],
     queryFn: async () => {
-      const cachedExercises = await getExercises();
-      if (Array.isArray(cachedExercises) && cachedExercises.length > 0) {
-        console.log("✅ Loaded exercises from IndexedDB");
-        return cachedExercises;
+      try {
+        const cachedExercises = await getExercises() as Exercise[];
+        return cachedExercises || [];
+      } catch (error) {
+        console.error("Error fetching exercises:", error);
+        return [] as Exercise[];
       }
-
-      console.warn("⚠️ No exercises found locally. Please sync.");
-      return [];
     },
-    refetchOnMount: false, // Prevent unnecessary API calls on mount
-    refetchOnWindowFocus: false, // Don't refetch when switching tabs
-    refetchOnReconnect: false, // Prevent auto-refetch on network reconnect
-    retry: 2, // Retry twice before failing
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 2,
   });
 };
 
@@ -38,59 +37,47 @@ export const useSyncExercises = () => {
   return useMutation({
     mutationFn: async () => {
       try {
-        console.log("🔄 Syncing exercises with API...");
-        const response = await axios.post<{ exercises: Exercise[] }>(`${API_URL}/sync`);
-        const exercises = response.data.exercises;
+        const lastSyncTime = await getLastSyncTime();
+        console.log(`🔄 Syncing new exercises with API since ${lastSyncTime}`);
 
-        if (!Array.isArray(exercises) || exercises.length === 0) {
-          console.warn("⚠️ API returned no exercises.");
+        const response = await axios.post<{ exercises: Exercise[]; lastSyncTime: number }>(
+          `${API_URL}/sync`,
+          { lastSyncTime }
+        );
+
+        const exercises = response.data.exercises;
+        if (!exercises.length) {
+          console.warn("⚠️ No new exercises found.");
           return [];
         }
 
-        // Ensure exercises are correctly mapped and stored
-        const formattedExercises: Exercise[] = exercises.map((exercise) => ({
-          id: exercise.id ?? "missing_id", // Catch missing ID issues
-          name: exercise.name ?? "Unknown Exercise",
-          group: exercise.group ?? "Unknown Group", // Ensure correct property mapping
-          hasVideo: Boolean(exercise.hasVideo), // Ensure strict boolean type
-        }));
+        await saveExercises(exercises);
+        await setLastSyncTime(response.data.lastSyncTime);
 
-        await saveExercises(formattedExercises);
+        // Only fetch videos for new exercises
+        for (const exercise of exercises) {
+          if (!exercise.hasVideo) continue;
 
-        // Download and cache videos
-        for (const exercise of formattedExercises) {
-          if (!exercise.id || exercise.id === "missing_id") {
-            console.error(`❌ Invalid exercise ID detected:`, exercise);
-            continue; // Skip any exercises with missing IDs
-          }
-
-          if (exercise.hasVideo) {
-            const existingVideo = await getVideo(exercise.id);
-            if (!existingVideo) {
-              console.log(`📥 Downloading video for ${exercise.name} (ID: ${exercise.id})...`);
-              try {
-                const videoResponse = await axios.get(`${API_URL}/video/${exercise.id}`, {
-                  responseType: "blob",
-                });
-                await saveVideo(exercise.id, videoResponse.data);
-              } catch (videoError) {
-                console.error(`❌ Failed to download video for ${exercise.name} (ID: ${exercise.id}):`, videoError);
-              }
+          const existingVideo = await getVideo(exercise.id);
+          if (!existingVideo) {
+            console.log(`📥 Downloading video for ${exercise.name} (ID: ${exercise.id})...`);
+            try {
+              const videoResponse = await axios.get(`${API_URL}/video/${exercise.id}`, { responseType: "blob" });
+              await saveVideo(exercise.id, videoResponse.data);
+            } catch (videoError) {
+              console.error(`❌ Failed to download video for ${exercise.name} (ID: ${exercise.id}):`, videoError);
             }
           }
         }
 
-        return formattedExercises;
+        return exercises;
       } catch (error) {
-        console.error("❌ Sync failed due to an error:", error);
-        throw new Error("Sync failed. Please try again.");
+        console.error("❌ Sync failed:", error);
+        throw new Error("Sync failed.");
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
-    },
-    onError: (error) => {
-      console.error("❌ Sync Error:", error);
     },
   });
 };
