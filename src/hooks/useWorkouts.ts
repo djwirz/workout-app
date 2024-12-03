@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { saveWorkouts, getWorkouts } from "../utils/db";
+import { saveWorkouts, getWorkouts, saveWorkoutEntries } from "../utils/db";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,6 +9,18 @@ export interface Workout {
   id: string;
   name: string;
   date: string;
+}
+
+// Workout Entry type
+export interface WorkoutEntry {
+  id: string;
+  workout_id: string;
+  exercise_id: string;
+  exercise_name: string;
+  sets: number;
+  reps: number;
+  weight: number;
+  rest_time: number;
 }
 
 export const useWorkouts = () => {
@@ -49,6 +61,25 @@ export const useSyncWorkouts = () => {
         }
 
         await saveWorkouts(workouts);
+        console.log(`✅ Saved ${workouts.length} workouts to IndexedDB`);
+
+        // Sync corresponding workout entries
+        for (const workout of workouts) {
+          try {
+            const entryResponse = await axios.get<{ entries: WorkoutEntry[] }>(`${API_URL}/workout/${workout.id}/entries`);
+            const entries = entryResponse.data.entries;
+
+            if (Array.isArray(entries) && entries.length > 0) {
+              console.log(`📥 Saving ${entries.length} entries for workout ${workout.id}`);
+              await saveWorkoutEntries(workout.id, entries);
+            } else {
+              console.warn(`⚠️ No workout entries found for workout ${workout.id}.`);
+            }
+          } catch (entryError) {
+            console.error(`❌ Failed to fetch entries for workout ${workout.id}:`, entryError);
+          }
+        }
+
         return workouts;
       } catch (error) {
         console.error("❌ Workout sync failed:", error);
