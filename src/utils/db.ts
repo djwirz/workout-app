@@ -25,3 +25,13 @@ export const saveVideo = async (id: string, videoBlob: Blob) => {
 export const getVideo = async (id: string) => {
   return await localforage.getItem<Blob>(`video-${id}`);
 };
+
+// Save last sync time
+export const setLastSyncTime = async (timestamp: number) => {
+  await localforage.setItem("lastSyncTime", timestamp);
+};
+
+// Get last sync time (defaults to 0 if not set)
+export const getLastSyncTime = async () => {
+  return (await localforage.getItem<number>("lastSyncTime")) || 0;
+};
