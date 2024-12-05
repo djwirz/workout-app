@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useWorkouts, useSyncWorkouts } from "../hooks/useWorkouts";
 
 const Workouts = () => {
@@ -16,7 +17,10 @@ const Workouts = () => {
       <ul>
         {workouts?.map((workout) => (
           <li key={workout.id}>
-            <strong>{workout.name}</strong> - {workout.date}
+            <Link to={`/workouts/${workout.id}`} style={{ textDecoration: "underline", color: "blue" }}>
+              <strong>{workout.name}</strong>
+            </Link>{" "}
+            - {workout.date}
           </li>
         ))}
       </ul>
