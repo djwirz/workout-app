@@ -25,7 +25,7 @@ function App() {
 function Home() {
   return (
     <div className="home">
-      <h1>Workouts</h1>
+      <h1 className="home-title">Workouts</h1>
       <nav className="home-links">
         <Link to="/planned">Planned</Link>
         <Link to="/ongoing">Ongoing</Link>
@@ -36,4 +36,5 @@ function Home() {
     </div>
   );
 }
+
 export default App;
