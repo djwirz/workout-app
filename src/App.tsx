@@ -28,6 +28,11 @@ export default function App() {
           ))}
         </nav>
 
+        {/* Persistent Page Header */}
+        <header className="text-center text-2xl font-bold py-4 border-b border-gray-700">
+          Workouts
+        </header>
+
         {/* Main Content */}
         <main className="flex-grow flex items-center justify-center text-xl">
           <Routes>
