@@ -14,6 +14,11 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-black text-white flex flex-col">
+        {/* Persistent Page Header - Always Above Navigation */}
+        <header className="text-center text-2xl font-bold py-4">
+          Workouts
+        </header>
+
         {/* Top Navigation */}
         <nav className="flex justify-center border-b border-gray-700 text-lg">
           {["Templates", "Planned", "Completed"].map((tab) => (
@@ -27,11 +32,6 @@ export default function App() {
             </Link>
           ))}
         </nav>
-
-        {/* Persistent Page Header */}
-        <header className="text-center text-2xl font-bold py-4 border-b border-gray-700">
-          Workouts
-        </header>
 
         {/* Main Content */}
         <main className="flex-grow flex items-center justify-center text-xl">
