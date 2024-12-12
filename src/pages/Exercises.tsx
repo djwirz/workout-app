@@ -1,6 +1,7 @@
 import { useExercises, useSyncExercises } from "../hooks/useExercises";
 import { getVideo } from "../utils/db";
 import { useEffect, useState } from "react";
+import SyncButton from "../components/SyncButton";
 
 interface Exercise {
   id: string;
@@ -33,9 +34,11 @@ const Exercises = () => {
   return (
     <div>
       <h1>Exercises</h1>
-      <button onClick={() => syncExercises.mutate()} disabled={syncExercises.isPending}>
-        {syncExercises.isPending ? "Syncing..." : "Sync Exercises"}
-      </button>
+      <SyncButton 
+        onSync={() => syncExercises.mutate()}
+        isPending={syncExercises.isPending}
+        label="Sync Exercises"
+      />
       <ul>
         {exercises?.map((exercise: Exercise) => (
           <li key={exercise.id}>

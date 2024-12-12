@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useWorkouts, useSyncWorkouts } from "../hooks/useWorkouts";
+import SyncButton from "../components/SyncButton";
 
 const Workouts = () => {
   const { data: workouts, isLoading, error } = useWorkouts();
@@ -10,13 +11,12 @@ const Workouts = () => {
 
   return (
     <div className="px-4 py-4">
-      <button
-        onClick={() => syncWorkouts.mutate()}
-        disabled={syncWorkouts.isPending}
-        className="mb-4 px-4 py-2 bg-gray-700 rounded"
-      >
-        {syncWorkouts.isPending ? "Syncing..." : "Sync Workouts"}
-      </button>
+      <SyncButton 
+        onSync={() => syncWorkouts.mutate()}
+        isPending={syncWorkouts.isPending}
+        className="mb-4"
+        label="Sync Workouts"
+      />
       <ul>
         {workouts?.map((workout) => (
           <li key={workout.id} className="mt-2">
