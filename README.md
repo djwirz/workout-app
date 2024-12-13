@@ -1,54 +1,129 @@
-# React + TypeScript + Vite
+# Workout App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A **React + TypeScript + Vite** progressive web application (PWA) for tracking and managing workouts, designed for **offline-first** functionality with manual data syncing.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Offline-first** with IndexedDB for local storage.
+- **Manual sync** of workouts, exercises, and entries.
+- **Workout templates** for easy session planning.
+- **Video caching** for exercise demonstrations.
+- **React Query** for data fetching and caching.
+- **Tailwind CSS** for styling.
+- **PWA support** for installation on mobile and desktop.
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Node.js** (latest LTS recommended)
+- **npm** (bundled with Node.js)
+- **Vite** (installed as a dev dependency)
+
+### Setup
+
+1. Clone the repository:
+
+   ```sh
+   git clone https://github.com/yourusername/djwirz-workout-app.git
+   cd djwirz-workout-app
+   ```
+
+2. Install dependencies:
+
+   ```sh
+   npm install
+   ```
+
+3. Create a `.env` file in the root directory and set the API URL:
+   ```sh
+   VITE_API_URL=http://your-api-endpoint
+   ```
+
+## Usage
+
+### Development
+
+Start the local development server:
+
+```sh
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Build
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Generate a production build:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```sh
+npm run build
 ```
+
+### Lint
+
+Check for linting errors:
+
+```sh
+npm run lint
+```
+
+### Preview
+
+Preview the production build locally:
+
+```sh
+npm run preview
+```
+
+### Manual Syncing
+
+Manually trigger a sync with the API:
+
+```sh
+npm run sync
+```
+
+## Project Structure
+
+```
+djwirz-workout-app/
+├── public/                 # Static assets
+├── src/
+│   ├── assets/             # Images, icons, etc.
+│   ├── hooks/              # Custom React hooks
+│   ├── pages/              # App pages (Planned, Ongoing, Completed, etc.)
+│   ├── utils/              # Utility functions and IndexedDB handlers
+│   ├── App.tsx             # Main app component
+│   ├── main.tsx            # App entry point
+│   ├── index.css           # Global styles
+│   ├── env.d.ts            # Type definitions for environment variables
+│   └── vite-env.d.ts       # Vite environment definitions
+├── .gitignore              # Git ignore rules
+├── package.json            # Project metadata and dependencies
+├── tailwind.config.js      # Tailwind CSS configuration
+├── tsconfig.json           # TypeScript configuration
+├── tsconfig.app.json       # TypeScript config for app
+├── tsconfig.node.json      # TypeScript config for Node scripts
+├── vite.config.ts          # Vite configuration
+└── README.md               # Project documentation
+```
+
+## API Endpoints
+
+The app syncs with an API defined in `VITE_API_URL`. Expected endpoints:
+
+- `POST /sync` - Triggers a full sync
+- `GET /exercises` - Fetches available exercises
+- `GET /workouts` - Fetches planned workouts
+- `GET /workout/:id/entries` - Fetches workout details
+- `GET /video/:id` - Fetches exercise video
+
+## Development Notes
+
+- Uses **IndexedDB** via `localforage` for offline data storage.
+- Uses **React Query** for state management and API requests.
+- PWA support via **vite-plugin-pwa**.
+- Bottom navigation bar provides quick access to **Ongoing Workouts** and **Exercises**.
+
+## License
+
+MIT License © 2025 Daniel Wirz
